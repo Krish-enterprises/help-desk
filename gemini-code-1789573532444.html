@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZolveHR - Manage Tickets</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#edf7ff,#ffffff,#eaf5ff);color:#102a56;font-weight:700}
+.page{max-width:1450px;margin:auto;padding:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:60px;height:60px;border-radius:18px;background:linear-gradient(145deg,#35a5ff,#0068dc);display:grid;place-items:center;color:white;font-size:29px;box-shadow:0 8px 18px #70baff88}
+h1{margin:0;font-size:32px;letter-spacing:-.5px}
+.sub{margin-top:4px;color:#60758f;font-size:14px}
+.search{width:400px;padding:14px 18px;border:1px solid #c9def2;border-radius:16px;background:#fff;box-shadow:0 7px 17px #8aaed544;font-weight:700;font-size:15px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:16px}
+.card{height:90px;border-radius:20px;padding:14px 26px;display:flex;align-items:center;gap:18px;border:1px solid #d2e6f8;cursor:pointer;box-shadow:0 7px 0 #b7cee2,0 12px 20px #789dbc44,inset 0 2px 4px #fff;transition:.18s}
+.card:hover{transform:translateY(-3px)} .card.active{outline:3px solid #1685f5}
+.res{background:linear-gradient(145deg,#effff7,#c9f8dc)} .pen{background:linear-gradient(145deg,#fffaf0,#ffe5a4)} .pro{background:linear-gradient(145deg,#eef7ff,#cde5ff)}
+.cicon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:27px;box-shadow:inset 0 3px 5px #fff8,0 5px 8px #0002}
+.res .cicon{background:#12b969} .pen .cicon{background:#ff9f0b} .pro .cicon{background:#087ff0}
+.card small{font-size:15px} .count{font-size:29px}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.filter{border:1px solid #c8dff3;background:#fff;color:#174477;padding:10px 17px;border-radius:12px;font-weight:800;cursor:pointer;box-shadow:0 3px 6px #8aaccc33; transition:0.2s;}
+.filter.active{background:#087ff0;color:#fff}
+
+/* Table layout updated for 100% zoom compatibility */
+.tableWrap{background:#ffffffbf;border:1px solid #cfe2f6;border-radius:20px;padding:9px;box-shadow:0 12px 28px #789db933;overflow-x:auto}
+.header,.ticket{min-width:1100px;width:100%;display:grid;grid-template-columns:35px 85px 1.8fr 100px 120px 2.2fr 120px 1.5fr 110px 110px 100px;align-items:center;text-align:left;}
+.header{height:55px;background:linear-gradient(145deg,#1479e2,#0755b0);color:#fff;border-radius:14px;padding:0 7px}
+.header div,.cell{padding:5px 6px;font-size:12px;line-height:1.3}
+.ticket{min-height:82px;margin-top:9px;border-radius:17px;background:linear-gradient(145deg,#fff,#eaf5ff);border:1px solid #bcd9f3;box-shadow:0 7px 0 #b8d0e7,0 10px 17px #7fa9ca44,inset 0 2px 4px #fff;transition:.18s}
+.ticket:hover{transform:translateY(-2px)}
+.ticket.it{background:linear-gradient(145deg,#fff3f6,#ffd7e0);border:2px solid #ff5570;box-shadow:0 7px 0 #d97887,0 10px 18px #e77b8b55,inset 0 2px 4px #fff}
+
+.type{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border-radius:11px;background:#d9fae8;color:#078f4a;border:1px solid #70dca3;font-size:11px;white-space:nowrap}
+.itType{background:#ffe0e7;color:#df1d40;border-color:#ff7890}
+.statusSelect{width:100%;padding:8px 6px;border-radius:8px;border:1px solid #bcd7ed;font-weight:800;font-size:12px;cursor:pointer;box-shadow:inset 0 2px 3px #fff,0 3px 5px #0002; transition: background 0.3s, color 0.3s;}
+.statusSelect.pending{background:#ffbd32;color:#573300} .statusSelect.inprogress{background:#0889ed;color:#fff} .statusSelect.completed{background:#19b96c;color:#fff}
+.resolve{width:100%;height:45px;border:1px solid #c8dbea;border-radius:8px;padding:6px;background:#fff;color:#19365e;font-weight:700;font-size:11px;resize:none}
+.date,.ip{white-space:normal; font-size: 11px; word-break: break-word;}
+
+.attachment{display:flex;flex-direction: column;align-items:center;gap:6px; justify-content: center;}
+.thumb{width:62px;height:45px;object-fit:cover;border-radius:9px;border:2px solid #d8e8f5;background:#eef6fc;cursor:pointer;box-shadow:0 3px 8px #45688855}
+.viewBtn{background:linear-gradient(145deg,#1999ff,#0069d9);color:#fff;border:0;border-radius:10px;padding:6px 12px;font-weight:800;font-size:11px;cursor:pointer;box-shadow:0 5px 0 #0756ad,0 7px 11px #268de955;white-space:nowrap; width: 100%;}
+.viewBtn:active{transform:translateY(3px);box-shadow:0 2px 0 #0756ad}
+.upload-label { cursor: pointer; text-align: center; margin-bottom: 2px;}
+.upload-label span { font-size: 9px; color: #087ff0; text-decoration: underline; display: block; margin-top: 3px;}
+
+/* Lightbox Modal CSS */
+.lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease; }
+.lightbox.show { display: flex; opacity: 1; }
+.lightbox img { max-width: 80%; max-height: 80%; border-radius: 12px; border: 4px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.lightbox-close { position: absolute; top: 25px; right: 45px; font-size: 50px; color: white; cursor: pointer; background: transparent; border: none; font-weight: bold; }
+
+@media(max-width:850px){.page{padding:10px}.top{flex-direction:column;align-items:stretch}.search{width:100%}.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="top">
+    <div class="brand"><div class="logo">🎧</div><div><h1>Manage Tickets</h1><div class="sub">Review Help Desk tickets assigned to the current role.</div></div></div>
+    <!-- Search attached to render() function -->
+    <input id="search" class="search" placeholder="🔍 Search Ticket No, Employee, Description, IP..." oninput="render()">
+  </div>
+
+  <div class="cards">
+    <div class="card res" id="cardCompleted" onclick="setStatusFilter('Completed', this)"><div class="cicon">✓</div><div><small>Resolved Tickets</small><div class="count" id="completedCount">0</div></div></div>
+    <div class="card pen" id="cardPending" onclick="setStatusFilter('Pending', this)"><div class="cicon">◷</div><div><small>Pending Tickets</small><div class="count" id="pendingCount">0</div></div></div>
+    <div class="card pro" id="cardProgress" onclick="setStatusFilter('In Progress', this)"><div class="cicon">▶</div><div><small>In Progress Tickets</small><div class="count" id="progressCount">0</div></div></div>
+  </div>
+
+  <div class="filters">
+    <button class="filter active" onclick="setStatusFilter('All', this)">All Tickets</button>
+    <button class="filter" onclick="setStatusFilter('Pending', this)">Pending</button>
+    <button class="filter" onclick="setStatusFilter('In Progress', this)">In Progress</button>
+    <button class="filter" onclick="setStatusFilter('Completed', this)">Completed</button>
+    <button class="filter type-filter" onclick="setTypeFilter('IT', this)">IT Issues</button>
+    <button class="filter type-filter active" onclick="setTypeFilter('All Types', this)">All Types</button>
+  </div>
+
+  <div class="tableWrap">
+    <div class="header">
+      <div>#</div><div>Ticket No</div><div>Employee</div><div>Contact No</div><div>Type</div><div>Description</div>
+      <div>Status</div><div>Resolve Details</div><div>Entry Date</div><div>IP Address</div><div style="text-align: center;">Issue Photo</div>
+    </div>
+    <div id="tickets">
+    
+      <!-- Ticket 1 -->
+      <div class="ticket" data-id="HD-0015" data-status="Completed" data-type="Other">
+        <div class="cell">1</div>
+        <div class="cell ticketno">HD-0015</div>
+        <div class="cell">Arun Kumar (EMP001)</div>
+        <div class="cell">9876543210</div>
+        <div class="cell"><span class="type">● Software Issue</span></div>
+        <div class="cell">Unable to login to ERP system</div>
+        <div class="cell">
+          <select class="statusSelect completed" onchange="changeStatusColor(this, 'HD-0015')">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed" selected>Completed</option>
+          </select>
+        </div>
+        <div class="cell"><textarea class="resolve" placeholder="Enter resolve details...">Login issue fixed. Cleared cache.</textarea></div>
+        <div class="cell date">📅 16/09/2026<br>10:15 AM</div>
+        <div class="cell ip">192.168.1.10</div>
+        <div class="cell attachment">
+          <label class="upload-label">
+              <img class="thumb" id="img-0015" src="image_d758cd.jpg" alt="Upload Photo">
+              <input type="file" accept="image/*" style="display:none;" onchange="previewImage(event, 'img-0015')">
+              <span>Click to Upload</span>
+          </label>
+          <button class="viewBtn" onclick="openLightbox('img-0015')">👁 View</button>
+        </div>
+      </div>
+      
+      <!-- Ticket 2 -->
+      <div class="ticket it" data-id="HD-0014" data-status="In Progress" data-type="IT">
+        <div class="cell">2</div>
+        <div class="cell ticketno">HD-0014</div>
+        <div class="cell">Priya Sharma (EMP002)</div>
+        <div class="cell">9876543211</div>
+        <div class="cell"><span class="type itType">🖥️ Laptop Issue</span></div>
+        <div class="cell">Laptop not working, system not booting</div>
+        <div class="cell">
+          <select class="statusSelect inprogress" onchange="changeStatusColor(this, 'HD-0014')">
+            <option value="Pending">Pending</option>
+            <option value="In Progress" selected>In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="cell"><textarea class="resolve" placeholder="Enter resolve details...">Checking with IT Team.</textarea></div>
+        <div class="cell date">📅 16/09/2026<br>09:45 AM</div>
+        <div class="cell ip">192.168.1.15</div>
+        <div class="cell attachment">
+          <label class="upload-label">
+              <img class="thumb" id="img-0014" src="image_d758cd.jpg" alt="Upload Photo">
+              <input type="file" accept="image/*" style="display:none;" onchange="previewImage(event, 'img-0014')">
+              <span>Click to Upload</span>
+          </label>
+          <button class="viewBtn" onclick="openLightbox('img-0014')">👁 View</button>
+        </div>
+      </div>
+
+      <!-- Ticket 3 -->
+      <div class="ticket it" data-id="HD-0013" data-status="Pending" data-type="IT">
+        <div class="cell">3</div>
+        <div class="cell ticketno">HD-0013</div>
+        <div class="cell">Rakesh M (EMP003)</div>
+        <div class="cell">9876543212</div>
+        <div class="cell"><span class="type itType">🖥️ Mail Issue</span></div>
+        <div class="cell">Not able to send or receive emails</div>
+        <div class="cell">
+          <select class="statusSelect pending" onchange="changeStatusColor(this, 'HD-0013')">
+            <option value="Pending" selected>Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="cell"><textarea class="resolve" placeholder="Enter resolve details..."></textarea></div>
+        <div class="cell date">📅 15/09/2026<br>04:20 PM</div>
+        <div class="cell ip">192.168.1.20</div>
+        <div class="cell attachment">
+          <label class="upload-label">
+              <img class="thumb" id="img-0013" src="image_d758cd.jpg" alt="Upload Photo">
+              <input type="file" accept="image/*" style="display:none;" onchange="previewImage(event, 'img-0013')">
+              <span>Click to Upload</span>
+          </label>
+          <button class="viewBtn" onclick="openLightbox('img-0013')">👁 View</button>
+        </div>
+      </div>
+
+      <!-- Ticket 4 -->
+      <div class="ticket" data-id="HD-0012" data-status="Completed" data-type="Other">
+        <div class="cell">4</div>
+        <div class="cell ticketno">HD-0012</div>
+        <div class="cell">Neha Gupta (EMP004)</div>
+        <div class="cell">9876543213</div>
+        <div class="cell"><span class="type">● HR Inquiry</span></div>
+        <div class="cell">Payroll slip mismatch for previous month</div>
+        <div class="cell">
+          <select class="statusSelect completed" onchange="changeStatusColor(this, 'HD-0012')">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed" selected>Completed</option>
+          </select>
+        </div>
+        <div class="cell"><textarea class="resolve" placeholder="Enter resolve details...">Adjusted calculations, sent revised slip.</textarea></div>
+        <div class="cell date">📅 14/09/2026<br>02:10 PM</div>
+        <div class="cell ip">192.168.1.33</div>
+        <div class="cell attachment">
+          <label class="upload-label">
+              <img class="thumb" id="img-0012" src="image_d758cd.jpg" alt="Upload Photo">
+              <input type="file" accept="image/*" style="display:none;" onchange="previewImage(event, 'img-0012')">
+              <span>Click to Upload</span>
+          </label>
+          <button class="viewBtn" onclick="openLightbox('img-0012')">👁 View</button>
+        </div>
+      </div>
+
+      <!-- Ticket 5 -->
+      <div class="ticket it" data-id="HD-0011" data-status="Pending" data-type="IT">
+        <div class="cell">5</div>
+        <div class="cell ticketno">HD-0011</div>
+        <div class="cell">Vikas Singh (EMP005)</div>
+        <div class="cell">9876543214</div>
+        <div class="cell"><span class="type itType">🖨️ Hardware Issue</span></div>
+        <div class="cell">Network printer on 3rd floor not connecting</div>
+        <div class="cell">
+          <select class="statusSelect pending" onchange="changeStatusColor(this, 'HD-0011')">
+            <option value="Pending" selected>Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="cell"><textarea class="resolve" placeholder="Enter resolve details..."></textarea></div>
+        <div class="cell date">📅 14/09/2026<br>11:05 AM</div>
+        <div class="cell ip">192.168.1.41</div>
+        <div class="cell attachment">
+          <label class="upload-label">
+              <img class="thumb" id="img-0011" src="image_d758cd.jpg" alt="Upload Photo">
+              <input type="file" accept="image/*" style="display:none;" onchange="previewImage(event, 'img-0011')">
+              <span>Click to Upload</span>
+          </label>
+          <button class="viewBtn" onclick="openLightbox('img-0011')">👁 View</button>
+        </div>
+      </div>
+
+      <!-- Ticket 6 -->
+      <div class="ticket" data-id="HD-0010" data-status="In Progress" data-type="Other">
+        <div class="cell">6</div>
+        <div class="cell ticketno">HD-0010</div>
+        <div class="cell">Aman Verma (EMP006)</div>
+        <div class="cell">9876543215</div>
+        <div class="cell"><span class="type">● Admin Issue</span></div>
+        <div class="cell">Lost ID card, need a replacement issued</div>
+        <div class="cell">
+          <select class="statusSelect inprogress" onchange="changeStatusColor(this, 'HD-0010')">
+            <option value="Pending">Pending</option>
+            <option value="In Progress" selected>In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <div class="cell"><textarea class="resolve" placeholder="Enter resolve details...">Printing new ID card.</textarea></div>
+        <div class="cell date">📅 13/09/2026<br>03:30 PM</div>
+        <div class="cell ip">192.168.1.55</div>
+        <div class="cell attachment">
+          <label class="upload-label">
+              <img class="thumb" id="img-0010" src="image_d758cd.jpg" alt="Upload Photo">
+              <input type="file" accept="image/*" style="display:none;" onchange="previewImage(event, 'img-0010')">
+              <span>Click to Upload</span>
+          </label>
+          <button class="viewBtn" onclick="openLightbox('img-0010')">👁 View</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox Modal Container -->
+<div class="lightbox" id="imageLightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+  <img id="lightboxImg" src="" alt="Enlarged Issue Photo">
+</div>
+
+<script>
+    // Variables for Dashboard Filtering
+    let currentStatusFilter = 'All';
+    let currentTypeFilter = 'All Types';
+
+    // 1. Instantly changes Dropdown Color & Updates Dashboard Logic
+    function changeStatusColor(selectObj, ticketId) {
+        // Remove existing visual classes
+        selectObj.classList.remove('pending', 'inprogress', 'completed');
+        
+        // Add new active class
+        const val = selectObj.value;
+        if (val === 'Pending') selectObj.classList.add('pending');
+        else if (val === 'In Progress') selectObj.classList.add('inprogress');
+        else if (val === 'Completed') selectObj.classList.add('completed');
+        
+        // Update DOM data-status to keep filtering logic synchronized
+        const ticketElement = document.querySelector(`.ticket[data-id="${ticketId}"]`);
+        if(ticketElement) {
+            ticketElement.setAttribute('data-status', val);
+        }
+        render(); // refresh dashboard stats & view
+    }
+
+    // 2. Click Logic for Status Filters (Top Cards & Status Buttons)
+    function setStatusFilter(status, element) {
+        currentStatusFilter = status;
+        
+        // Highlight active Dashboard Card
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        if (status === 'Completed') document.getElementById('cardCompleted').classList.add('active');
+        else if (status === 'Pending') document.getElementById('cardPending').classList.add('active');
+        else if (status === 'In Progress') document.getElementById('cardProgress').classList.add('active');
+        
+        // Highlight active Filter Button (excluding IT filters)
+        document.querySelectorAll('.filter:not(.type-filter)').forEach(btn => {
+            if (btn.innerText === status || (status === 'All' && btn.innerText === 'All Tickets')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        render();
+    }
+
+    // 3. Click Logic for Type Filters
+    function setTypeFilter(type, element) {
+        currentTypeFilter = type;
+        document.querySelectorAll('.type-filter').forEach(btn => btn.classList.remove('active'));
+        if(element) element.classList.add('active');
+        render();
+    }
+
+    // 4. Main Render Function (Applies Search, Filters, and calculates Stats)
+    function render() {
+        const searchTerm = document.getElementById('search').value.toLowerCase();
+        const tickets = document.querySelectorAll('.ticket');
+        
+        let totalComp = 0, totalPen = 0, totalProg = 0;
+
+        tickets.forEach(ticket => {
+            const status = ticket.getAttribute('data-status');
+            const type = ticket.getAttribute('data-type');
+            const text = ticket.innerText.toLowerCase(); // grabs text from row for searching
+
+            // Calculate Totals for Top Dashboard Stats
+            if (status === 'Completed') totalComp++;
+            else if (status === 'Pending') totalPen++;
+            else if (status === 'In Progress') totalProg++;
+
+            // Filtering conditions
+            const matchStatus = (currentStatusFilter === 'All' || status === currentStatusFilter);
+            const matchType = (currentTypeFilter === 'All Types' || type === currentTypeFilter);
+            const matchSearch = text.includes(searchTerm);
+
+            // Hide or Show Row
+            if (matchStatus && matchType && matchSearch) {
+                ticket.style.display = 'grid'; // Grid preserves horizontal table layout
+            } else {
+                ticket.style.display = 'none';
+            }
+        });
+
+        // Push calculated totals to dashboard numbers
+        document.getElementById('completedCount').innerText = totalComp;
+        document.getElementById('pendingCount').innerText = totalPen;
+        document.getElementById('progressCount').innerText = totalProg;
+    }
+
+    // 5. Lightbox & Image Preview Engine
+    function previewImage(event, imgId) {
+        const input = event.target;
+        const reader = new FileReader();
+        reader.onload = function() {
+            // Apply loaded image instantly to thumbnail
+            document.getElementById(imgId).src = reader.result;
+        };
+        if (input.files && input.files[0]) {
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function openLightbox(imgId) {
+        // Grabs the exact src (dummy or newly uploaded base64) to show in lightbox
+        const imgSrc = document.getElementById(imgId).src;
+        document.getElementById('lightboxImg').src = imgSrc;
+        document.getElementById('imageLightbox').classList.add('show');
+    }
+
+    function closeLightbox(e) {
+        // Close if they click the "X" button or the dark background overlay
+        if(e.target.id === 'imageLightbox' || e.target.classList.contains('lightbox-close')) {
+            document.getElementById('imageLightbox').classList.remove('show');
+        }
+    }
+
+    // Initialize scripts on page load
+    window.onload = () => { render(); }
+</script>
+</body>
+</html>
